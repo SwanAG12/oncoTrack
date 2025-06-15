@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "840652510106",
+    "project_id": "caloriebase-4d508",
+    "storage_bucket": "caloriebase-4d508.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:840652510106:android:1d32999b7f885f9b76a023",
+        "android_client_info": {
+          "package_name": "com.example.flutter_application_1"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBijO5eiZl0Kby1R8DKCTHXWZXut1uqR3s"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
