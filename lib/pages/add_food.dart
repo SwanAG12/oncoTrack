@@ -22,33 +22,36 @@ class _AddFoodPageState extends State<AddFoodPage> {
   List<Map<String, dynamic>> _foods = [];
   List<Map<String, dynamic>> _filteredFoods = [];
   TextEditingController _searchController = TextEditingController();
-  TextEditingController _amountController = TextEditingController(text: '100');
+  TextEditingController _amountController = TextEditingController(text: '1');
   Map<String, dynamic>? _selectedFood;
 
   @override
   void initState() {
     super.initState();
-    _amountController.text = '100';
+    _amountController.text = '1'; // Default to 1 serving
     _loadFoods();
   }
 
   Future<void> _loadFoods() async {
-    try {
-      final response = await supabase
-          .from('food_database')
-          .select('*')
-          .order('Name', ascending: true);
+  try {
+    final response = await supabase
+        .from('food_database')
+        .select('*')
+        .order('Name', ascending: true);
 
-      setState(() {
-        _foods = List<Map<String, dynamic>>.from(response);
-        _filteredFoods = _foods;
-      });
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error loading foods: $e')),
-      );
-    }
+    print('Fetched foods: $response'); // ✅ DEBUG PRINT
+
+    setState(() {
+      _foods = List<Map<String, dynamic>>.from(response);
+      _filteredFoods = _foods;
+    });
+  } catch (e) {
+    print('Error loading foods: $e'); // ✅ DEBUG PRINT
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Error loading foods: $e')),
+    );
   }
+}
 
   void _searchFoods(String query) {
     setState(() {
@@ -60,9 +63,6 @@ class _AddFoodPageState extends State<AddFoodPage> {
   }
 
   Future<void> _addFoodToDiary() async {
-    
-
-
     if (_selectedFood == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Please select a food first')),
@@ -70,8 +70,7 @@ class _AddFoodPageState extends State<AddFoodPage> {
       return;
     }
 
-    final amount = double.tryParse(_amountController.text) ?? 100.0;
-    final multiplier = amount / 100.0;
+    final servings = double.tryParse(_amountController.text) ?? 1.0;
 
     try {
       await supabase.from('food_diary').insert({
@@ -79,27 +78,17 @@ class _AddFoodPageState extends State<AddFoodPage> {
         'meal_type': widget.mealType.toLowerCase(),
         'date': widget.selectedDate.toIso8601String(),
         'food_id': _selectedFood!['id'],
-        'amount': amount,
+        'amount': servings,
         'Name': _selectedFood!['Name'],
         'Group': _selectedFood!['Group'],
-        'Energy': _selectedFood!['Energy'] * multiplier,
-        'Protein': _selectedFood!['Protein'] * multiplier,
-        'Fat': _selectedFood!['Fat'] * multiplier,
-        'Carbs': _selectedFood!['Carbs'] * multiplier,
-        'Fiber': _selectedFood!['Fiber'] * multiplier,
-        'Sugar': _selectedFood!['Sugar'] * multiplier,
-        'Vit A': _selectedFood!['Vit A'] * multiplier,
-        'Vit B1': _selectedFood!['Vit B1'] * multiplier,
-        'Vit B2': _selectedFood!['Vit B2'] * multiplier,
-        'Vit B3': _selectedFood!['Vit B3'] * multiplier,
-        'Vit C': _selectedFood!['Vit C'] * multiplier,
-        'Calcium': _selectedFood!['Calcium'] * multiplier,
-        'Iron': _selectedFood!['Iron'] * multiplier,
-        'Mag': _selectedFood!['Mag'] * multiplier,
-        'Phos': _selectedFood!['Phos'] * multiplier,
-        'Potassium': _selectedFood!['Potassium'] * multiplier,
-        'Sodium': _selectedFood!['Sodium'] * multiplier,
-        'Zinc': _selectedFood!['Zinc'] * multiplier,
+        'Serving': _selectedFood!['Serving'],
+        'Energy': (_selectedFood!['Energy'] ?? 0) * servings,
+        'Protein': (_selectedFood!['Protein'] ?? 0) * servings,
+        'Fat': (_selectedFood!['Fat'] ?? 0) * servings,
+        'Carbs': (_selectedFood!['Carbs'] ?? 0) * servings,
+        'Fiber': (_selectedFood!['Fiber'] ?? 0) * servings,
+        'Sugar': (_selectedFood!['Sugar'] ?? 0) * servings,
+        'Sodium': (_selectedFood!['Sodium'] ?? 0) * servings,
       });
 
       Navigator.pop(context, true);
@@ -147,25 +136,30 @@ class _AddFoodPageState extends State<AddFoodPage> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        _selectedFood!['Name'],
+                        _selectedFood!['Name'] ?? '',
                         style: const TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
                       const SizedBox(height: 8),
+                      Text(
+                        'Serving Size: ${_selectedFood!['Serving'] ?? '1 serving'}',
+                        style: const TextStyle(fontStyle: FontStyle.italic),
+                      ),
+                      const SizedBox(height: 8),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text('Energy: ${_selectedFood!['Energy']} kcal'),
-                          Text('Protein: ${_selectedFood!['Protein']}g'),
+                          Text('Energy: ${_selectedFood!['Energy'] ?? 0} kcal'),
+                          Text('Protein: ${_selectedFood!['Protein'] ?? 0}g'),
                         ],
                       ),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text('Carbs: ${_selectedFood!['Carbs']}g'),
-                          Text('Fat: ${_selectedFood!['Fat']}g'),
+                          Text('Carbs: ${_selectedFood!['Carbs'] ?? 0}g'),
+                          Text('Fat: ${_selectedFood!['Fat'] ?? 0}g'),
                         ],
                       ),
                     ],
@@ -176,11 +170,11 @@ class _AddFoodPageState extends State<AddFoodPage> {
               TextField(
                 controller: _amountController,
                 decoration: InputDecoration(
-                  labelText: 'Amount (grams)',
+                  labelText: 'Number of servings',
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  suffixText: 'g',
+                  suffixText: 'x ${_selectedFood!['Serving'] ?? "serving"}',
                 ),
                 keyboardType: TextInputType.number,
               ),
@@ -192,9 +186,10 @@ class _AddFoodPageState extends State<AddFoodPage> {
                 itemBuilder: (context, index) {
                   final food = _filteredFoods[index];
                   return ListTile(
-                    title: Text(food['Name']),
+                    title: Text(food['Name'] ?? ''),
                     subtitle: Text(
-                      '${food['Energy']} kcal | P:${food['Protein']}g C:${food['Carbs']}g F:${food['Fat']}g',
+                      '${food['Energy'] ?? 0} kcal | Serving: ${food['Serving'] ?? "serving"}\n'
+                      'P:${food['Protein'] ?? 0}g C:${food['Carbs'] ?? 0}g F:${food['Fat'] ?? 0}g',
                     ),
                     trailing: _selectedFood?['id'] == food['id']
                         ? const Icon(Icons.check, color: Colors.green)
@@ -202,7 +197,7 @@ class _AddFoodPageState extends State<AddFoodPage> {
                     onTap: () {
                       setState(() {
                         _selectedFood = food;
-                        _amountController.text = '100';
+                        _amountController.text = '1';
                       });
                     },
                   );
