@@ -129,7 +129,7 @@ class _HomeDashboardState extends State<HomeDashboard> {
         if (food == null) continue;
         final mealType = entry['meal_type'].toString().toLowerCase();
         final amount = (entry['amount'] as num).toDouble();
-        final multiplier = amount / 100.0;
+        final multiplier = amount;
 
         final displayItem = {
   'id': entry['id'],
