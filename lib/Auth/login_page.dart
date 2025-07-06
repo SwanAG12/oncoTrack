@@ -26,8 +26,7 @@ class _LoginPageState extends State<LoginPage> {
   final TextEditingController _otpController = TextEditingController();
   String _completePhone = '';
 
-
-  bool isEmailLogin = false; // Default to phone login
+  bool isEmailLogin = false;
   bool isLoading = false;
   String? _verificationId;
   bool otpSent = false;
@@ -42,46 +41,49 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   Future<void> _sendOTP() async {
-  final phone = _completePhone.trim();
-  if (phone.isEmpty) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Please enter a valid phone number')),
-    );
-    return;
-  }
-
-  setState(() => isLoading = true);
-
-  try {
-    await _authService.signInWithPhoneNumber(phone, (verificationId, resendToken) {
-      setState(() {
-        _verificationId = verificationId;
-        otpSent = true;
-      });
-    });
-  } on FirebaseAuthException catch (e) {
-    String message;
-    if (e.code == 'invalid-phone-number') {
-      message = 'The phone number entered is invalid. Please use the correct format.';
-    } else if (e.code == 'too-many-requests') {
-      message =
-          'Too many requests from this device. Please try again later or use a different device.';
-    } else {
-      message = 'Failed to send OTP. ${e.message}';
+    final phone = _completePhone.trim();
+    if (phone.isEmpty) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please enter a valid phone number')),
+      );
+      return;
     }
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message)),
-    );
-  } catch (e) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Unexpected error: $e')),
-    );
-  } finally {
-    setState(() => isLoading = false);
-  }
-}
+    setState(() => isLoading = true);
 
+    try {
+      await _authService.signInWithPhoneNumber(phone, (verificationId, resendToken) {
+        if (!mounted) return;
+        setState(() {
+          _verificationId = verificationId;
+          otpSent = true;
+        });
+      });
+    } on FirebaseAuthException catch (e) {
+      if (!mounted) return;
+      String message;
+      if (e.code == 'invalid-phone-number') {
+        message = 'The phone number entered is invalid. Please use the correct format.';
+      } else if (e.code == 'too-many-requests') {
+        message =
+            'Too many requests from this device. Please try again later or use a different device.';
+      } else {
+        message = 'Failed to send OTP. ${e.message}';
+      }
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(message)),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Unexpected error: $e')),
+      );
+    } finally {
+      if (mounted) setState(() => isLoading = false);
+    }
+  }
 
   Future<void> _verifyOTP() async {
     if (_verificationId == null || _otpController.text.isEmpty) return;
@@ -90,6 +92,7 @@ class _LoginPageState extends State<LoginPage> {
     try {
       final user = await _authService.verifyOTP(_verificationId!, _otpController.text);
       if (user != null) {
+        if (!mounted) return;
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
@@ -98,9 +101,10 @@ class _LoginPageState extends State<LoginPage> {
         );
       }
     } catch (e) {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Invalid OTP')));
     } finally {
-      setState(() => isLoading = false);
+      if (mounted) setState(() => isLoading = false);
     }
   }
 
@@ -114,6 +118,7 @@ class _LoginPageState extends State<LoginPage> {
         _passwordController.text.trim(),
       );
       if (user != null) {
+        if (!mounted) return;
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
@@ -122,9 +127,10 @@ class _LoginPageState extends State<LoginPage> {
         );
       }
     } catch (e) {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Login Error: $e')));
     } finally {
-      setState(() => isLoading = false);
+      if (mounted) setState(() => isLoading = false);
     }
   }
 
@@ -151,8 +157,6 @@ class _LoginPageState extends State<LoginPage> {
                       ),
                     ),
                     const SizedBox(height: 20),
-
-                    // Toggle between phone and email login
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
@@ -161,7 +165,7 @@ class _LoginPageState extends State<LoginPage> {
                           onTap: () {
                             setState(() {
                               isEmailLogin = !isEmailLogin;
-                              otpSent = false; // Reset OTP state
+                              otpSent = false;
                             });
                           },
                           child: Text(
@@ -178,29 +182,18 @@ class _LoginPageState extends State<LoginPage> {
 
                     // Phone/OTP Login
                     if (!isEmailLogin) ...[
-                      if (!isEmailLogin) ...[
-  IntlPhoneField(
-    controller: _phoneController,
-    initialCountryCode: 'IN',
-    decoration: _cleanInputDecoration('Phone Number', Icons.phone),
-    style: const TextStyle(color: textColor),
-    onChanged: (phone) {
-      _completePhone = phone.completeNumber;
-    },
-    onSaved: (phone) {
-      _completePhone = phone?.completeNumber ?? '';
-    },
-  ),
-  const SizedBox(height: 20),
-  if (otpSent)
-    TextFormField(
-      controller: _otpController,
-      decoration: _cleanInputDecoration('OTP', Icons.lock),
-      keyboardType: TextInputType.number,
-    ),
-  const SizedBox(height: 20),
-],
-
+                      IntlPhoneField(
+                        controller: _phoneController,
+                        initialCountryCode: 'IN',
+                        decoration: _cleanInputDecoration('Phone Number', Icons.phone),
+                        style: const TextStyle(color: textColor),
+                        onChanged: (phone) {
+                          _completePhone = phone.completeNumber;
+                        },
+                        onSaved: (phone) {
+                          _completePhone = phone?.completeNumber ?? '';
+                        },
+                      ),
                       const SizedBox(height: 20),
                       if (otpSent)
                         TextFormField(

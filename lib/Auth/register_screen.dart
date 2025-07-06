@@ -3,6 +3,8 @@ import 'package:flutter_application_1/Auth/auth_service.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_application_1/pages/patient_details_screen.dart';
+import 'package:flutter_application_1/pages/terms_of_agreement.dart';
+
 import 'package:intl_phone_field/intl_phone_field.dart';
 
 const Color primaryColor = Color(0xFFA8D5BA);
@@ -91,11 +93,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
         );
 
         Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (context) => PatientDetailsScreen(userId: user.uid),
-          ),
-        );
+  context,
+  MaterialPageRoute(
+    builder: (context) => TermsAgreementScreen(userId: user.uid),
+  ),
+);
+
       }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Invalid OTP')));
@@ -127,11 +130,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
         );
 
         Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (context) => PatientDetailsScreen(userId: user.uid),
-          ),
-        );
+  context,
+  MaterialPageRoute(
+    builder: (context) => TermsAgreementScreen(userId: user.uid),
+  ),
+);
+
       }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Registration Error: $e')));

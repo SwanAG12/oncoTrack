@@ -88,6 +88,33 @@ class _PatientDetailsScreenState extends State<PatientDetailsScreen> {
   bool _showErrors = false;
 
   @override
+  void initState() {
+    super.initState();
+    _loadExistingDetails();
+  }
+
+  Future<void> _loadExistingDetails() async {
+    final doc = await _firestore.collection('patients').doc(widget.userId).get();
+    if (!doc.exists) return;
+
+    final data = doc.data()!;
+    setState(() {
+      _ageController.text = data['age']?.toString() ?? '';
+      _weightController.text = data['weight']?.toString() ?? '';
+      _heightController.text = data['height']?.toString() ?? '';
+      _medicalCondition = data['medicalCondition'];
+      _cancerType = data['cancerType'];
+      _treatmentPlan = data['treatmentPlan'];
+      _eatingNormally = data['eatingNormally'];
+      _dietPreference = data['dietPreference'];
+      _foodType = data['foodType'];
+      _dietType = data['dietType'];
+      _indianCuisine = data['indianCuisine'];
+      _preferredFoodTexture = data['preferredFoodTexture'];
+    });
+  }
+
+  @override
   void dispose() {
     _ageController.dispose();
     _weightController.dispose();

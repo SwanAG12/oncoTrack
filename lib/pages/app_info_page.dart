@@ -15,23 +15,6 @@ class SettingsPage extends StatelessWidget {
     );
   }
 
-  void _showDialog(BuildContext context, String title, String content) {
-    showDialog(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: Text(title),
-        content: Text(content),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: const Text("OK"),
-          ),
-        ],
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final userId = FirebaseAuth.instance.currentUser?.uid;
@@ -95,55 +78,56 @@ class SettingsPage extends StatelessWidget {
             const SizedBox(height: 12),
 
             _settingsTile(
-              icon: Icons.privacy_tip_outlined,
-              title: "Privacy Policy",
-              onTap: () {
-                _showDialog(
-                  context,
-                  "Privacy Policy",
-                  "Your data is stored securely and only used for the purpose of tracking nutrition and progress. We do not sell or share your data with third parties.",
-                );
-              },
-            ),
-            const SizedBox(height: 12),
-
-            _settingsTile(
-              icon: Icons.article_outlined,
-              title: "Terms of Use",
-              onTap: () {
-                _showDialog(
-                  context,
-                  "Terms of Use",
-                  "This app provides nutritional tracking information but is not a substitute for medical advice. Always consult with your healthcare provider.",
-                );
-              },
-            ),
-            const SizedBox(height: 12),
-
-            _settingsTile(
-              icon: Icons.feedback_outlined,
-              title: "Feedback / Report a Bug",
-              onTap: () {
-                _showDialog(
-                  context,
-                  "Feedback",
-                  "Please email us at support@onctrack.app with any suggestions or bug reports. We’d love to hear from you!",
-                );
-              },
-            ),
-            const SizedBox(height: 12),
-
-            _settingsTile(
               icon: Icons.info_outline,
               title: "App Info",
               onTap: () {
-                _showDialog(
-                  context,
-                  "About App",
-                  "OncoTrack v1.0\nCreated with ❤️ for patients' nutrition tracking.",
+                showDialog(
+                  context: context,
+                  builder: (ctx) => AlertDialog(
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                    title: const Text("About App"),
+                    content: const Text(
+                      "OncoTrack v1.0.0 (Build 1)\n\nCreated with ❤️ to help cancer patients track their nutrition and recovery progress.",
+                      style: TextStyle(fontSize: 14),
+                    ),
+                    actions: [
+                      TextButton(
+                        onPressed: () => Navigator.pop(ctx),
+                        child: const Text("OK"),
+                      ),
+                    ],
+                  ),
                 );
               },
             ),
+            const SizedBox(height: 12),
+
+            _settingsTile(
+              icon: Icons.policy_outlined,
+              title: "Medical Disclaimer",
+              onTap: () {
+                showDialog(
+                  context: context,
+                  builder: (ctx) => AlertDialog(
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                    title: const Text("Medical Disclaimer"),
+                    content: const Text(
+                      "This app is intended for informational and nutritional guidance only. "
+                      "It does not replace professional medical advice, diagnosis, or treatment. "
+                      "Always consult your doctor or healthcare provider before making any health decisions.",
+                      style: TextStyle(fontSize: 13),
+                    ),
+                    actions: [
+                      TextButton(
+                        onPressed: () => Navigator.pop(ctx),
+                        child: const Text("OK"),
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
+
             const SizedBox(height: 12),
 
             _settingsTile(

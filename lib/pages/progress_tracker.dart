@@ -140,6 +140,7 @@ class _DailyTrackerState extends State<DailyTracker> {
       fiber += (entry['Fiber'] ?? 0).toDouble();
       sugar += (entry['Sugar'] ?? 0).toDouble();
     }
+    if (!mounted) return;
 
     setState(() {
       todayCalories = cal;
@@ -436,77 +437,87 @@ class _MonthlyTrackerState extends State<MonthlyTracker> {
     );
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return LayoutBuilder(
-  builder: (context, constraints) {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(16.0),
-      child: ConstrainedBox(
-        constraints: BoxConstraints(minWidth: constraints.maxWidth),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            TableCalendar(
-              focusedDay: DateTime.now(),
-              firstDay: DateTime.utc(2020, 1, 1),
-              lastDay: DateTime.utc(2030, 12, 31),
-              calendarFormat: CalendarFormat.month,
-              availableCalendarFormats: const {
-                CalendarFormat.month: 'Month',
-              },
-              calendarBuilders: CalendarBuilders(
-                defaultBuilder: (context, day, focusedDay) {
-                  final matchedDate = completionMap.keys.firstWhere(
-                    (d) => d.year == day.year && d.month == day.month && d.day == day.day,
-                    orElse: () => DateTime(2000),
-                  );
-
-                  final percent = completionMap[matchedDate] ?? 0;
-
-                  Color color;
-                  if (percent >= 90) {
-                    color = Colors.green;
-                  } else if (percent >= 75) {
-                    color = Colors.yellow;
-                  } else if (percent > 0) {
-                    color = Colors.red;
-                  } else {
-                    color = Colors.transparent;
-                  }
-
-                  return Container(
-                    decoration: BoxDecoration(
-                      color: color,
-                      shape: BoxShape.circle,
-                    ),
-                    child: Center(child: Text('${day.day}')),
-                  );
+@override
+Widget build(BuildContext context) {
+  return LayoutBuilder(
+    builder: (context, constraints) {
+      return SingleChildScrollView(
+        padding: const EdgeInsets.all(16.0),
+        child: ConstrainedBox(
+          constraints: BoxConstraints(minWidth: constraints.maxWidth),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center, // Center align all children
+            children: [
+              TableCalendar(
+                focusedDay: DateTime.now(),
+                firstDay: DateTime.utc(2020, 1, 1),
+                lastDay: DateTime.utc(2030, 12, 31),
+                calendarFormat: CalendarFormat.month,
+                availableCalendarFormats: const {
+                  CalendarFormat.month: 'Month',
                 },
-              ),
-            ),
-            const SizedBox(height: 24),
-            const Text("Legend", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-            const SizedBox(height: 8),
-            _buildLegendItem(Colors.green, "Hit 90% or above of calorie & protein goal for the day"),
-            const SizedBox(height: 4),
-            _buildLegendItem(Colors.yellow, "Hit 75% or above of calorie & protein goal"),
-            const SizedBox(height: 4),
-            _buildLegendItem(Colors.red, "Did not hit 75% of your goals"),
-            const SizedBox(height: 24),
-            const Divider(thickness: 1.5),
-            const SizedBox(height: 12),
-            const Text(
-              "Even 1% is forward.",
-              style: TextStyle(fontSize: 15, fontStyle: FontStyle.italic),
-              textAlign: TextAlign.center,
-            ),
-          ],
-        ),
-      ),
-    );
-  },
-);
+                calendarBuilders: CalendarBuilders(
+                  defaultBuilder: (context, day, focusedDay) {
+                    final matchedDate = completionMap.keys.firstWhere(
+                      (d) => d.year == day.year && d.month == day.month && d.day == day.day,
+                      orElse: () => DateTime(2000),
+                    );
 
-  }
+                    final percent = completionMap[matchedDate] ?? 0;
+
+                    Color color;
+                    if (percent >= 90) {
+                      color = Colors.green;
+                    } else if (percent >= 75) {
+                      color = Colors.yellow;
+                    } else if (percent > 0) {
+                      color = Colors.red;
+                    } else {
+                      color = Colors.transparent;
+                    }
+
+                    return Container(
+                      decoration: BoxDecoration(
+                        color: color,
+                        shape: BoxShape.circle,
+                      ),
+                      child: Center(child: Text('${day.day}')),
+                    );
+                  },
+                ),
+              ),
+              const SizedBox(height: 24),
+              const Text(
+                "Legend",
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 12),
+              Wrap(
+                alignment: WrapAlignment.center,
+                spacing: 12,
+                runSpacing: 8,
+                children: [
+                  _buildLegendItem(Colors.green, "Hit 90%+ of calorie & protein goal"),
+                  _buildLegendItem(Colors.yellow, "Hit 75%+ of calorie & protein goal"),
+                  _buildLegendItem(Colors.red, "Below 75% of your goals"),
+                ],
+              ),
+              const SizedBox(height: 24),
+              const Divider(thickness: 1.5),
+              const SizedBox(height: 12),
+              const Text(
+                "Even 1% is forward.",
+                style: TextStyle(fontSize: 15, fontStyle: FontStyle.italic),
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
+        ),
+      );
+    },
+  );
+}
+
+
 }

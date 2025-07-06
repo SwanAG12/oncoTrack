@@ -133,6 +133,7 @@
           }
         });
       } catch (e) {
+        if(!mounted)return;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Error loading food items: $e')),
         );
